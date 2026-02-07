@@ -33,14 +33,19 @@
 
 <input type="date" name="date" class="form-control mb-2">
 
-<select name="difficulty" class="form-control mb-2">
-<option value="1">Легко</option>
-<option value="2">Норм</option>
-<option value="3">Средне</option>
-<option value="4">Сложно</option>
-<option value="5">Очень сложно</option>
-<option value="6">Невозможный</option>
-</select>
+<div class="difficulty-select">
+
+<button type="button" onclick="setDifficulty(1)" class="diff-btn diff1">Легко</button>
+<button type="button" onclick="setDifficulty(2)" class="diff-btn diff2">Норм</button>
+<button type="button" onclick="setDifficulty(3)" class="diff-btn diff3">Средне</button>
+<button type="button" onclick="setDifficulty(4)" class="diff-btn diff4">Сложно</button>
+<button type="button" onclick="setDifficulty(5)" class="diff-btn diff5">Очень сложно</button>
+<button type="button" onclick="setDifficulty(6)" class="diff-btn diff6">Невозможный</button>
+
+<input type="hidden" name="difficulty" id="difficultyInput" value="1">
+
+</div>
+
 
 <button class="btn btn-success w-100">Добавить</button>
 
