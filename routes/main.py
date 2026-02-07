@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, session, redirect, jsonify, request
-from models import User, Task, Congrat, Comment
+from flask import Blueprint, render_template, session, redirect, jsonify
+from models import User, Task, Congrat, db
 from datetime import date
 
 main_bp = Blueprint("main", __name__)
@@ -33,7 +33,14 @@ def data():
                     "id":t.id,
                     "text":t.text,
                     "difficulty":t.difficulty,
-                    "completed":t.completed
+                    "completed":t.completed,
+                    "congrats": Congrat.query.filter_by(task_id=t.id).count(),
+                    "user_congrat": bool(
+                        Congrat.query.filter_by(
+                            task_id=t.id,
+                            user_id=session["user_id"]
+                        ).first()
+                    )
                 }
                 for t in tasks
             ]
@@ -48,5 +55,20 @@ def complete(id):
     task = Task.query.get(id)
     task.completed = not task.completed
     db.session.commit()
+
+    return "ok"
+
+
+@main_bp.route("/congrat/<int:task_id>")
+def congrat(task_id):
+
+    user_id = session["user_id"]
+
+    exists = Congrat.query.filter_by(task_id=task_id,user_id=user_id).first()
+
+    if not exists:
+        c = Congrat(task_id=task_id,user_id=user_id)
+        db.session.add(c)
+        db.session.commit()
 
     return "ok"
