@@ -1,88 +1,126 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-
-<title>Профиль</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  <title>Профиль</title>
 </head>
 
 <body class="bg-soft">
-
 <div class="container py-3">
 
-<a href="/main" class="btn btn-outline-secondary mb-3">← Главная</a>
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <a href="/main" class="btn btn-outline-secondary btn-sm">← Главная</a>
+    {% if me.is_admin %}
+      <a href="/admin" class="btn btn-outline-dark btn-sm">Admin</a>
+    {% endif %}
+  </div>
 
-<div class="card p-3 mb-3 text-center">
+  <div class="card p-3 mb-3 text-center">
 
-{% if me.avatar %}
-<img src="data:image/png;base64,{{ me.avatar }}" class="avatar-large mx-auto">
-{% else %}
-<img src="{{ url_for('static', filename='avatars/default.png') }}" class="avatar-large mx-auto">
-{% endif %}
+    {% if me.avatar %}
+      <img src="data:image/png;base64,{{ me.avatar }}" class="avatar-large mx-auto" alt="avatar">
+    {% else %}
+      <img src="{{ url_for('static', filename='avatars/default.png') }}" class="avatar-large mx-auto" alt="avatar">
+    {% endif %}
 
-<h4 class="mt-2">{{ me.name }}</h4>
+    <h4 class="mt-2 mb-2">{{ me.name }}</h4>
 
-<div class="progress mb-3">
-<div class="progress-bar" style="width: {{progress}}%">
-{{progress}}%
+    {% if request.args.get('err') == 'taken' %}
+      <div class="alert alert-warning py-2">Это имя уже занято.</div>
+    {% elif request.args.get('err') == 'empty' %}
+      <div class="alert alert-warning py-2">Имя не может быть пустым.</div>
+    {% endif %}
+
+    <form method="POST" action="/profile/change_name" class="mb-3">
+      <input name="name" class="form-control mb-2" placeholder="Новое имя">
+      <button class="btn btn-outline-primary w-100">Сменить имя</button>
+    </form>
+
+    <div class="progress mb-3">
+      <div class="progress-bar" style="width: {{ progress }}%">{{ progress }}%</div>
+    </div>
+
+    <form method="POST" action="/profile/upload_avatar" enctype="multipart/form-data">
+      <input type="file" name="avatar" class="form-control mb-2" accept="image/*">
+      <button class="btn btn-primary w-100">Загрузить аватар</button>
+    </form>
+
+  </div>
+
+  <div class="card p-3 mb-3">
+    <h5 class="mb-3">Добавить задачу</h5>
+
+    <form method="POST">
+      <input name="text" class="form-control mb-2" placeholder="Текст задачи..." maxlength="220" required>
+      <input type="date" name="date" class="form-control mb-2" required>
+
+      <div class="difficulty-select mb-2">
+        <button type="button" class="diff-btn diff1" data-level="1">Легко</button>
+        <button type="button" class="diff-btn diff2" data-level="2">Норм</button>
+        <button type="button" class="diff-btn diff3 active" data-level="3">Средне</button>
+        <button type="button" class="diff-btn diff4" data-level="4">Сложно</button>
+        <button type="button" class="diff-btn diff5" data-level="5">Очень сложно</button>
+        <button type="button" class="diff-btn diff6" data-level="6">Невозможный</button>
+      </div>
+
+      <input type="hidden" name="difficulty" id="difficultyInput" value="3">
+      <button class="btn btn-success w-100">Добавить</button>
+    </form>
+  </div>
+
+  <div class="card p-3">
+    <h5 class="mb-2">Все мои задачи</h5>
+
+    {% if tasks %}
+      {% for t in tasks %}
+        <div class="task diff{{ t.difficulty }}">
+          <div class="me-2">
+            <div class="fw-semibold">{{ t.text }}</div>
+            <div class="small text-muted">{{ t.date }}</div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            {% if t.completed %}
+              <span class="badge text-bg-success">✅</span>
+            {% endif %}
+
+            <a href="/profile/toggle/{{ t.id }}" class="btn btn-sm btn-outline-success">
+              {{ "Снять" if t.completed else "Выполнить" }}
+            </a>
+
+            <a href="/profile/delete/{{ t.id }}" class="btn btn-sm btn-outline-danger">
+              Удалить
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-muted">Пока задач нет.</div>
+    {% endif %}
+  </div>
+
+  <div class="pb-5"></div>
 </div>
-</div>
 
-<form method="POST" action="/profile/upload_avatar" enctype="multipart/form-data">
-<input type="file" name="avatar" class="form-control mb-2">
-<button class="btn btn-primary w-100">Загрузить аватар</button>
-</form>
-
-</div>
-
-<div class="card p-3 mb-3">
-
-<h5 class="mb-3">Добавить задачу</h5>
-
-<form method="POST">
-
-<input name="text" class="form-control mb-2" placeholder="Задача" required>
-
-<input type="date" name="date" class="form-control mb-2" required>
-
-<div class="difficulty-select mb-2">
-
-<button type="button" class="diff-btn diff1" data-level="1">Легко</button>
-<button type="button" class="diff-btn diff2" data-level="2">Норм</button>
-<button type="button" class="diff-btn diff3 active" data-level="3">Средне</button>
-<button type="button" class="diff-btn diff4" data-level="4">Сложно</button>
-<button type="button" class="diff-btn diff5" data-level="5">Очень сложно</button>
-<button type="button" class="diff-btn diff6" data-level="6">Невозможный</button>
-
-</div>
-
-<input type="hidden" name="difficulty" id="difficultyInput" value="3">
-
-<button class="btn btn-success w-100">Добавить</button>
-
-</form>
-
-</div>
-
-</div>
+<nav class="navbar fixed-bottom bg-white border-top">
+  <div class="container d-flex justify-content-around py-2">
+    <a class="nav-link fw-semibold" href="/main">🏠 Главная</a>
+    <a class="nav-link fw-semibold" href="/profile">👤 Профиль</a>
+  </div>
+</nav>
 
 <script>
-const input = document.getElementById("difficultyInput")
-
-document.querySelectorAll(".diff-btn").forEach(btn=>{
-btn.onclick = () => {
-
-document.querySelectorAll(".diff-btn").forEach(b=>b.classList.remove("active"))
-btn.classList.add("active")
-
-input.value = btn.dataset.level
-
-}
-})
+  // выбор сложности (работает стабильно)
+  const input = document.getElementById("difficultyInput");
+  document.querySelectorAll(".diff-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".diff-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      input.value = btn.dataset.level;
+    });
+  });
 </script>
 
 </body>
