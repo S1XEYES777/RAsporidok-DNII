@@ -1,86 +1,95 @@
 from flask import Blueprint, render_template, request, redirect, session
 from models import db, User, Task
 import base64
+from datetime import date as dt_date
 
 profile_bp = Blueprint("profile", __name__)
 
+def require_login():
+    return "user_id" in session
+
 @profile_bp.route("/profile", methods=["GET", "POST"])
 def profile():
-
-    if "user_id" not in session:
+    if not require_login():
         return redirect("/")
 
-    user = User.query.get(session["user_id"])
+    me = User.query.get(session["user_id"])
 
     if request.method == "POST":
+        text = (request.form.get("text") or "").strip()
+        d = (request.form.get("date") or "").strip()
+        diff = int(request.form.get("difficulty") or 3)
+        diff = max(1, min(6, diff))
 
-        text = request.form["text"]
-        date = request.form["date"]
-        difficulty = int(request.form["difficulty"])
+        if text and d:
+            db.session.add(Task(text=text, date=d, difficulty=diff, user_id=me.id))
+            db.session.commit()
 
-        t = Task(
-            text=text,
-            date=date,
-            difficulty=difficulty,
-            user_id=user.id
-        )
+        return redirect("/profile")
 
-        db.session.add(t)
-        db.session.commit()
-
-    tasks = Task.query.filter_by(user_id=user.id).all()
-
+    tasks = Task.query.filter_by(user_id=me.id).order_by(Task.date.desc(), Task.created_at.desc()).all()
+    total = len(tasks)
     done = len([t for t in tasks if t.completed])
-    progress = int((done / len(tasks)) * 100) if tasks else 0
+    progress = int((done / total) * 100) if total else 0
 
-    return render_template("profile.html",
-                           me=user,
-                           tasks=tasks,
-                           progress=progress)
-
+    return render_template("profile.html", me=me, tasks=tasks, progress=progress)
 
 @profile_bp.route("/profile/upload_avatar", methods=["POST"])
 def upload_avatar():
-
-    if "user_id" not in session:
+    if not require_login():
         return redirect("/")
 
-    user = User.query.get(session["user_id"])
-
+    me = User.query.get(session["user_id"])
     file = request.files.get("avatar")
-
-    if not file:
+    if not file or file.filename == "":
         return redirect("/profile")
 
     img_bytes = file.read()
-
-    encoded = base64.b64encode(img_bytes).decode("utf-8")
-
-    user.avatar = encoded
+    # сохраняем base64 в БД
+    me.avatar = base64.b64encode(img_bytes).decode("utf-8")
     db.session.commit()
-
     return redirect("/profile")
 
+@profile_bp.route("/profile/change_name", methods=["POST"])
+def change_name():
+    if not require_login():
+        return redirect("/")
 
-@profile_bp.route("/profile/delete/<int:id>")
-def delete_task(id):
+    me = User.query.get(session["user_id"])
+    new_name = (request.form.get("name") or "").strip()
 
-    t = Task.query.get(id)
+    if not new_name:
+        return redirect("/profile?err=empty")
 
-    if t and t.user_id == session["user_id"]:
-        db.session.delete(t)
-        db.session.commit()
+    # имя уже занято?
+    exists = User.query.filter(User.name == new_name, User.id != me.id).first()
+    if exists:
+        return redirect("/profile?err=taken")
 
+    me.name = new_name
+    db.session.commit()
     return redirect("/profile")
 
+@profile_bp.route("/profile/toggle/<int:task_id>")
+def toggle_task(task_id):
+    if not require_login():
+        return redirect("/")
 
-@profile_bp.route("/profile/toggle/<int:id>")
-def toggle_task(id):
-
-    t = Task.query.get(id)
-
-    if t and t.user_id == session["user_id"]:
+    me_id = session["user_id"]
+    t = Task.query.get(task_id)
+    if t and t.user_id == me_id:
         t.completed = not t.completed
         db.session.commit()
+    return redirect("/profile")
 
+@profile_bp.route("/profile/delete/<int:task_id>")
+def delete_task(task_id):
+    if not require_login():
+        return redirect("/")
+
+    me_id = session["user_id"]
+    t = Task.query.get(task_id)
+    if t and t.user_id == me_id:
+        db.session.delete(t)
+        db.session.commit()
     return redirect("/profile")
