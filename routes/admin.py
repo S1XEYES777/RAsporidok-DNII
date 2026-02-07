@@ -12,7 +12,8 @@ def admin():
         return redirect("/main")
 
     users = User.query.all()
-    return render_template("admin.html", users=users)
+    return render_template("admin.html",users=users)
+
 
 @admin_bp.route("/delete_user/<int:id>")
 def delete_user(id):
@@ -30,4 +31,3 @@ def delete_user(id):
     db.session.commit()
 
     return redirect("/admin")
-
