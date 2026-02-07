@@ -30,6 +30,7 @@
 <form method="POST">
 
 <input name="text" class="form-control mb-2" placeholder="Задача">
+
 <input type="date" name="date" class="form-control mb-2">
 
 <select name="difficulty" class="form-control mb-2">
@@ -47,18 +48,33 @@
 
 <hr>
 
+<h4>Все задачи</h4>
+
 {% for t in tasks %}
 
 <div class="task diff{{t.difficulty}}">
 
-<b>{{t.text}}</b> ({{t.date}})
+<span>
+<b>{{t.text}}</b>
+<br>
+<small>{{t.date}}</small>
+</span>
+
+<span>
 
 {% if t.completed %}
 <span>✅</span>
+{% else %}
+<a href="/complete_task/{{t.id}}" class="btn btn-success btn-sm">
+Выполнить
+</a>
 {% endif %}
 
-<a href="/complete_task/{{t.id}}" class="btn btn-sm btn-light">✔</a>
-<a href="/delete_task/{{t.id}}" class="btn btn-sm btn-danger">🗑</a>
+<a href="/delete_task/{{t.id}}" class="btn btn-danger btn-sm">
+Удалить
+</a>
+
+</span>
 
 </div>
 
