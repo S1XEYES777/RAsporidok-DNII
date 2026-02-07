@@ -1,23 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="/static/css/style.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/css/style.css" rel="stylesheet">
+  <title>Вход</title>
 </head>
+<body class="bg-soft">
+  <div class="container py-5">
+    <div class="mx-auto card p-4" style="max-width:420px;">
+      <h3 class="mb-2">Friends Planner</h3>
+      <div class="text-muted mb-3">Введи имя и заходи</div>
 
-<body class="d-flex justify-content-center align-items-center vh-100 bg-light">
+      {% if error %}
+      <div class="alert alert-danger py-2">{{ error }}</div>
+      {% endif %}
 
-<div class="card p-4">
-
-<h3 class="mb-3">Friends Planner</h3>
-
-<form method="POST">
-<input name="name" class="form-control mb-3" placeholder="Введите имя">
-<button class="btn btn-primary w-100">Войти</button>
-</form>
-
-</div>
-
+      <form method="POST">
+        <input name="name" class="form-control mb-3" placeholder="Имя" autocomplete="off">
+        <button class="btn btn-primary w-100">Войти</button>
+      </form>
+      <div class="small text-muted mt-3">Админ: <b>Admin0987654321</b></div>
+    </div>
+  </div>
 </body>
 </html>
