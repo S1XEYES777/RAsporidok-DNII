@@ -6,49 +6,18 @@
 <link href="/static/css/style.css" rel="stylesheet">
 </head>
 
-<body class="bg-light">
+<body class="bg-dark text-white">
 
 <div class="container mt-3">
-
 <h3>Сегодня</h3>
 
-<div class="row">
-
-{% for block in data %}
-<div class="col-md-4 col-12 mb-3">
-
-<div class="card shadow glass p-3">
-
-<div class="d-flex align-items-center mb-2">
-<img src="/static/avatars/{{ block.user.avatar }}" class="avatar">
-<h5 class="ms-2">{{ block.user.name }}</h5>
-</div>
-
-{% if block.tasks %}
-
-{% for t in block.tasks %}
-
-<div class="task diff{{t.difficulty}}">
-
-{{t.text}}
-
-</div>
-
-{% endfor %}
-
-{% else %}
-<p>Сегодня бездельничает 😎</p>
-{% endif %}
-
-</div>
-</div>
-{% endfor %}
-
-</div>
+<div class="row" id="cards"></div>
 
 <a href="/profile" class="btn btn-primary w-100">Профиль</a>
-
 </div>
+
+<audio id="doneSound" src="/static/js/done.mp3"></audio>
+
+<script src="/static/js/main.js"></script>
 </body>
 </html>
-
