@@ -1,62 +1,10 @@
-.login-bg{
-background:linear-gradient(45deg,#0f2027,#203a43,#2c5364);
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-}
-
-.glass{
-background:rgba(255,255,255,0.1);
-backdrop-filter:blur(12px);
-border-radius:20px;
-padding:20px;
-}
-
-.avatar{
-width:50px;
-height:50px;
-border-radius:50%;
-object-fit:cover;
-}
-
-.avatar-large{
-width:120px;
-height:120px;
-border-radius:50%;
-}
-
-.task{
-padding:10px;
-border-radius:12px;
-margin-bottom:8px;
-transition:0.3s;
-}
-
-.diff1{background:#00c853;}
-.diff2{background:#64dd17;}
-.diff3{background:#ffd600;color:black;}
-.diff4{background:#ff6d00;}
-.diff5{background:#d50000;}
-.diff6{
-background:linear-gradient(45deg,#9c27b0,#e040fb);
-animation:pulse 2s infinite;
-}
-
-@keyframes pulse{
-0%{box-shadow:0 0 5px #e040fb;}
-50%{box-shadow:0 0 20px #e040fb;}
-100%{box-shadow:0 0 5px #e040fb;}
-}
-/* ---------- ОБЩИЙ СТИЛЬ ---------- */
-
 body{
 background:#f5f7fb;
-font-family: 'Segoe UI', sans-serif;
+font-family:'Segoe UI',sans-serif;
 color:#222;
 }
 
-/* ---------- КАРТОЧКИ ---------- */
+/* Карточки */
 
 .card{
 border:none;
@@ -70,7 +18,7 @@ background:white;
 transform:translateY(-4px);
 }
 
-/* ---------- АВАТАР ---------- */
+/* Аватары */
 
 .avatar{
 width:50px;
@@ -88,7 +36,7 @@ object-fit:cover;
 border:4px solid #eee;
 }
 
-/* ---------- ЗАДАЧИ ---------- */
+/* Задачи */
 
 .task{
 padding:12px;
@@ -96,14 +44,16 @@ border-radius:14px;
 margin-bottom:10px;
 font-weight:500;
 transition:0.3s;
-position:relative;
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
 
 .task:hover{
 transform:translateX(6px);
 }
 
-/* ---------- СЛОЖНОСТЬ ---------- */
+/* Сложность */
 
 .diff1{background:#d4f8e8;}
 .diff2{background:#e9fcd4;}
@@ -112,11 +62,11 @@ transform:translateX(6px);
 .diff5{background:#ffd0d0;}
 
 .diff6{
-background: linear-gradient(45deg,#d9c2ff,#f0cfff);
+background:linear-gradient(45deg,#d9c2ff,#f0cfff);
 animation:pulse 2s infinite;
 }
 
-/* ---------- АНИМАЦИЯ НЕВОЗМОЖНЫЙ ---------- */
+/* Анимация невозможного */
 
 @keyframes pulse{
 0%{box-shadow:0 0 4px #c084fc;}
@@ -124,12 +74,11 @@ animation:pulse 2s infinite;
 100%{box-shadow:0 0 4px #c084fc;}
 }
 
-/* ---------- КНОПКИ ---------- */
+/* Кнопки */
 
 .btn{
 border-radius:12px;
 font-weight:500;
-padding:6px 14px;
 transition:0.3s;
 }
 
@@ -147,29 +96,12 @@ background:#16a34a;
 border:none;
 }
 
-.btn-success:hover{
-background:#15803d;
-}
-
 .btn-danger{
 background:#dc2626;
 border:none;
 }
 
-.btn-danger:hover{
-background:#b91c1c;
-}
-
-.btn-light{
-background:#f3f4f6;
-border:none;
-}
-
-.btn-light:hover{
-background:#e5e7eb;
-}
-
-/* ---------- ПРОГРЕСС ---------- */
+/* Прогресс */
 
 .progress{
 height:18px;
@@ -181,32 +113,4 @@ background:#eee;
 border-radius:10px;
 font-size:12px;
 font-weight:600;
-}
-
-/* ---------- LOGIN ---------- */
-
-.login-bg{
-background: linear-gradient(120deg,#fdfbfb,#ebedee);
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-}
-
-.login-box{
-width:320px;
-}
-
-/* ---------- МОБИЛЬНАЯ АДАПТАЦИЯ ---------- */
-
-@media(max-width:768px){
-
-.card{
-border-radius:16px;
-}
-
-.task{
-font-size:14px;
-}
-
 }
