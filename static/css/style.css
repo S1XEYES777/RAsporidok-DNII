@@ -48,3 +48,165 @@ animation:pulse 2s infinite;
 50%{box-shadow:0 0 20px #e040fb;}
 100%{box-shadow:0 0 5px #e040fb;}
 }
+/* ---------- ОБЩИЙ СТИЛЬ ---------- */
+
+body{
+background:#f5f7fb;
+font-family: 'Segoe UI', sans-serif;
+color:#222;
+}
+
+/* ---------- КАРТОЧКИ ---------- */
+
+.card{
+border:none;
+border-radius:20px;
+box-shadow:0 6px 20px rgba(0,0,0,0.08);
+transition:0.3s;
+background:white;
+}
+
+.card:hover{
+transform:translateY(-4px);
+}
+
+/* ---------- АВАТАР ---------- */
+
+.avatar{
+width:50px;
+height:50px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #f1f1f1;
+}
+
+.avatar-large{
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid #eee;
+}
+
+/* ---------- ЗАДАЧИ ---------- */
+
+.task{
+padding:12px;
+border-radius:14px;
+margin-bottom:10px;
+font-weight:500;
+transition:0.3s;
+position:relative;
+}
+
+.task:hover{
+transform:translateX(6px);
+}
+
+/* ---------- СЛОЖНОСТЬ ---------- */
+
+.diff1{background:#d4f8e8;}
+.diff2{background:#e9fcd4;}
+.diff3{background:#fff6c9;}
+.diff4{background:#ffe1c2;}
+.diff5{background:#ffd0d0;}
+
+.diff6{
+background: linear-gradient(45deg,#d9c2ff,#f0cfff);
+animation:pulse 2s infinite;
+}
+
+/* ---------- АНИМАЦИЯ НЕВОЗМОЖНЫЙ ---------- */
+
+@keyframes pulse{
+0%{box-shadow:0 0 4px #c084fc;}
+50%{box-shadow:0 0 18px #c084fc;}
+100%{box-shadow:0 0 4px #c084fc;}
+}
+
+/* ---------- КНОПКИ ---------- */
+
+.btn{
+border-radius:12px;
+font-weight:500;
+padding:6px 14px;
+transition:0.3s;
+}
+
+.btn-primary{
+background:#4f46e5;
+border:none;
+}
+
+.btn-primary:hover{
+background:#4338ca;
+}
+
+.btn-success{
+background:#16a34a;
+border:none;
+}
+
+.btn-success:hover{
+background:#15803d;
+}
+
+.btn-danger{
+background:#dc2626;
+border:none;
+}
+
+.btn-danger:hover{
+background:#b91c1c;
+}
+
+.btn-light{
+background:#f3f4f6;
+border:none;
+}
+
+.btn-light:hover{
+background:#e5e7eb;
+}
+
+/* ---------- ПРОГРЕСС ---------- */
+
+.progress{
+height:18px;
+border-radius:10px;
+background:#eee;
+}
+
+.progress-bar{
+border-radius:10px;
+font-size:12px;
+font-weight:600;
+}
+
+/* ---------- LOGIN ---------- */
+
+.login-bg{
+background: linear-gradient(120deg,#fdfbfb,#ebedee);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.login-box{
+width:320px;
+}
+
+/* ---------- МОБИЛЬНАЯ АДАПТАЦИЯ ---------- */
+
+@media(max-width:768px){
+
+.card{
+border-radius:16px;
+}
+
+.task{
+font-size:14px;
+}
+
+}
