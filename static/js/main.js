@@ -1,185 +1,238 @@
-// ---------- Конфетти ----------
+let dates = [];
+let selectedIndex = 0;
+
+function formatISO(d){
+  return d.toISOString().split("T")[0];
+}
+
+function buildDates(){
+  dates = [];
+  const base = new Date();
+  for(let i=0;i<7;i++){
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    dates.push({
+      iso: formatISO(d),
+      label: i===0 ? "Сегодня" : (i===1 ? "Завтра" : `+${i} дней`)
+    });
+  }
+}
+
+function escapeHtml(s){
+  return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+function avatarSrc(base64){
+  return base64 ? ("data:image/png;base64," + base64) : "/static/avatars/default.png";
+}
+
+/* ---------- Конфетти ---------- */
 function confettiBurst(){
+  const canvas = document.createElement("canvas");
+  canvas.style.position = "fixed";
+  canvas.style.left = "0";
+  canvas.style.top = "0";
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  canvas.style.pointerEvents = "none";
+  canvas.style.zIndex = "9999";
+  document.body.appendChild(canvas);
 
-const canvas = document.createElement("canvas")
-canvas.style.position = "fixed"
-canvas.style.left = "0"
-canvas.style.top = "0"
-canvas.style.width = "100%"
-canvas.style.height = "100%"
-canvas.style.pointerEvents = "none"
-canvas.style.zIndex = "9999"
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width = window.innerWidth;
+  const h = canvas.height = window.innerHeight;
 
-document.body.appendChild(canvas)
+  const colors = ["#ff6b6b","#ffd93d","#6bcBef","#6bff95","#b28dff"];
+  const parts = [];
+  for(let i=0;i<140;i++){
+    parts.push({
+      x: w*0.5,
+      y: h*0.25,
+      vx: (Math.random()-0.5)*10,
+      vy: Math.random()*-8 - 4,
+      g: 0.25 + Math.random()*0.2,
+      s: 4 + Math.random()*5,
+      c: colors[Math.floor(Math.random()*colors.length)],
+      r: Math.random()*Math.PI
+    });
+  }
 
-const ctx = canvas.getContext("2d")
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+  let t = 0;
+  function tick(){
+    t++;
+    ctx.clearRect(0,0,w,h);
+    parts.forEach(p=>{
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.r += 0.2;
 
-const particles = []
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.r);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
+      ctx.restore();
+    });
 
-const colors = ["#ff6b6b","#ffd93d","#6bcBef","#6bff95","#b28dff"]
-
-for(let i=0;i<120;i++){
-
-particles.push({
-x:canvas.width/2,
-y:canvas.height/4,
-vx:(Math.random()-0.5)*10,
-vy:Math.random()*-8,
-gravity:0.25,
-size:4+Math.random()*6,
-color:colors[Math.floor(Math.random()*colors.length)],
-rotation:Math.random()*360
-})
-
+    if(t < 120) requestAnimationFrame(tick);
+    else canvas.remove();
+  }
+  tick();
 }
 
-let frame = 0
+/* ---------- Рендер чипов дат ---------- */
+function renderDateChips(){
+  const chips = document.getElementById("dateChips");
+  const label = document.getElementById("selectedLabel");
+  if(!chips) return;
 
-function draw(){
+  chips.innerHTML = dates.map((d, idx)=>`
+    <div class="date-chip ${idx===selectedIndex ? "active" : ""}" onclick="selectDate(${idx})">
+      ${d.label}
+      <span class="text-muted" style="font-weight:600; margin-left:6px;">${d.iso}</span>
+    </div>
+  `).join("");
 
-ctx.clearRect(0,0,canvas.width,canvas.height)
-
-particles.forEach(p=>{
-
-p.vy+=p.gravity
-p.x+=p.vx
-p.y+=p.vy
-p.rotation+=2
-
-ctx.save()
-ctx.translate(p.x,p.y)
-ctx.rotate(p.rotation*Math.PI/180)
-ctx.fillStyle=p.color
-ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size)
-ctx.restore()
-
-})
-
-frame++
-
-if(frame<120){
-requestAnimationFrame(draw)
-}else{
-canvas.remove()
+  label.textContent = dates[selectedIndex].iso;
 }
 
+window.selectDate = function(idx){
+  selectedIndex = Math.max(0, Math.min(dates.length-1, idx));
+  renderDateChips();
+  load();
 }
 
-draw()
+/* ---------- Свайп (на телефоне) ---------- */
+function enableSwipe(){
+  const bar = document.getElementById("dateBar");
+  if(!bar) return;
 
+  let startX = 0;
+  let startY = 0;
+  let moving = false;
+
+  bar.addEventListener("touchstart", (e)=>{
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    moving = true;
+  }, {passive:true});
+
+  bar.addEventListener("touchmove", (e)=>{
+    if(!moving) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    // если человек скроллит вниз — не мешаем
+    if(Math.abs(dy) > Math.abs(dx)) return;
+  }, {passive:true});
+
+  bar.addEventListener("touchend", (e)=>{
+    if(!moving) return;
+    moving = false;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX;
+
+    const threshold = 45; // насколько надо свайпнуть
+    if(dx <= -threshold){
+      // влево -> следующий день
+      if(selectedIndex < dates.length-1){
+        selectedIndex++;
+        renderDateChips();
+        load();
+      }
+    } else if(dx >= threshold){
+      // вправо -> предыдущий день
+      if(selectedIndex > 0){
+        selectedIndex--;
+        renderDateChips();
+        load();
+      }
+    }
+  }, {passive:true});
 }
 
-
-
-// ---------- Экранирование текста ----------
-function escapeHtml(text){
-
-return text
-.replaceAll("&","&amp;")
-.replaceAll("<","&lt;")
-.replaceAll(">","&gt;")
-
-}
-
-
-
-// ---------- Загрузка данных ----------
+/* ---------- Загрузка ---------- */
 async function load(){
+  try{
+    const selected = dates[selectedIndex].iso;
+    const res = await fetch(`/api/data?date=${encodeURIComponent(selected)}`);
+    const data = await res.json();
+    if(data.error) return;
 
-try{
+    const cards = document.getElementById("cards");
+    let html = "";
 
-let r = await fetch("/api/data")
-let data = await r.json()
+    data.users.forEach(u=>{
+      html += `
+        <div class="col-12 col-md-6 col-lg-4 mb-3">
+          <div class="card p-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <img src="${avatarSrc(u.avatar)}" class="avatar" alt="av">
+              <div>
+                <div class="fw-semibold">${escapeHtml(u.name)}</div>
+                <div class="small text-muted">Планы на ${dates[selectedIndex].iso}</div>
+              </div>
+            </div>
+      `;
 
-let html=""
+      if(u.tasks && u.tasks.length){
+        u.tasks.forEach(t=>{
+          const showCongratsBtn = (t.completed && data.me !== t.ownerId && !t.youCongrat);
+          const congratsCount = (t.congrats && t.congrats>0) ? `<span class="small text-muted ms-2">🎉 ${t.congrats}</span>` : "";
 
-data.forEach(u=>{
+          html += `
+            <div class="task diff${t.difficulty}">
+              <div class="me-2">
+                <div class="fw-semibold">${escapeHtml(t.text)}</div>
+                <div class="small text-muted">
+                  ${t.completed ? "✅ Выполнено" : "⏳ В процессе"} ${congratsCount}
+                </div>
+              </div>
 
-html+=`
-<div class="col-md-4 col-12 mb-3">
-<div class="card p-3 user-card">
+              <div class="d-flex align-items-center gap-2">
+                ${showCongratsBtn ? `<button class="btn btn-primary btn-sm" onclick="congrat(${t.id})">🎉</button>` : ``}
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        html += `<div class="text-muted">Нет задач 😎</div>`;
+      }
 
-<div class="d-flex align-items-center mb-2">
+      html += `</div></div>`;
+    });
 
-<img src="${u.avatar ? 'data:image/png;base64,' + u.avatar : '/static/avatars/default.png'}" class="avatar">
-
-<h5 class="ms-2">${escapeHtml(u.name)}</h5>
-
-</div>
-`
-
-
-// ---------- Задачи ----------
-if(u.tasks.length>0){
-
-u.tasks.forEach(t=>{
-
-html+=`
-<div class="task diff${t.difficulty}">
-
-<span>${escapeHtml(t.text)}</span>
-
-<span class="task-actions">
-
-${t.completed ? '<span class="done-icon">✅</span>' : ""}
-
-${t.completed && !t.user_congrat ? 
-`<button onclick="congrat(${t.id})" class="btn btn-primary btn-sm congrats-btn">🎉</button>` : ""}
-
-${t.congrats > 0 ? `<small class="ms-1">🎉 ${t.congrats}</small>` : ""}
-
-</span>
-
-</div>
-`
-})
-
-}
-else{
-html+=`<div class="text-muted">Сегодня отдыхает 😎</div>`
-}
-
-html+=`</div></div>`
-
-})
-
-
-document.getElementById("cards").innerHTML = html
-
-}
-catch(e){
-console.log("Ошибка загрузки:", e)
+    cards.innerHTML = html;
+  } catch (e){
+    console.log("Load error:", e);
+  }
 }
 
+/* ---------- Поздравление ---------- */
+window.congrat = async function(taskId){
+  try{
+    const res = await fetch("/api/congrat", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({task_id: taskId})
+    });
+    const data = await res.json();
+    if(data.ok){
+      confettiBurst();
+      await load();
+    }
+  } catch(e){
+    console.log("Congrat error:", e);
+  }
 }
 
-
-
-// ---------- Поздравление ----------
-async function congrat(id){
-
-try{
-
-await fetch("/congrat/"+id)
-
-confettiBurst()
-
-load()
-
-}
-catch(e){
-console.log("Ошибка поздравления:", e)
-}
-
-}
-
-
-
-// ---------- Авто обновление ----------
-setInterval(load, 3000)
-
-
-// ---------- Первый запуск ----------
-load()
+/* ---------- Старт ---------- */
+buildDates();
+renderDateChips();
+enableSwipe();
+load();
+setInterval(load, 4000);
