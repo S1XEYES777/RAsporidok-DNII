@@ -3,7 +3,7 @@ from models import db, User, Task, Congrat
 
 admin_bp = Blueprint("admin", __name__)
 
-def require_admin():
+def is_admin():
     uid = session.get("user_id")
     if not uid:
         return False
@@ -12,21 +12,20 @@ def require_admin():
 
 @admin_bp.route("/admin")
 def admin():
-    if not require_admin():
+    if not is_admin():
         return redirect("/main")
     users = User.query.order_by(User.created_at.asc()).all()
     return render_template("admin.html", users=users)
 
 @admin_bp.route("/admin/delete_user/<int:user_id>")
 def delete_user(user_id):
-    if not require_admin():
+    if not is_admin():
         return redirect("/main")
 
     u = User.query.get(user_id)
     if not u or u.name == "Admin0987654321":
         return redirect("/admin")
 
-    # удалить поздравления по задачам этого юзера
     user_tasks = Task.query.filter_by(user_id=user_id).all()
     task_ids = [t.id for t in user_tasks]
     if task_ids:
