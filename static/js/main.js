@@ -60,3 +60,19 @@ load()
 
 setInterval(load,3000)
 load()
+<script>
+
+function setDifficulty(level){
+
+document.getElementById("difficultyInput").value = level
+
+document.querySelectorAll(".diff-btn").forEach(btn=>{
+btn.classList.remove("active")
+})
+
+document.querySelector(`.diff${level}`).classList.add("active")
+
+}
+
+</script>
+
