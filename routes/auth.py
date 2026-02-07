@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, render_template, request, redirect, session
 from models import db, User
 
 auth_bp = Blueprint("auth", __name__)
 
-@auth_bp.route("/", methods=["GET", "POST"])
+@auth_bp.route("/", methods=["GET","POST"])
 def login():
+
     if request.method == "POST":
         name = request.form["name"]
 
@@ -19,7 +20,7 @@ def login():
             db.session.add(user)
             db.session.commit()
 
+        session["user_id"] = user.id
         return redirect("/main")
 
     return render_template("login.html")
-
