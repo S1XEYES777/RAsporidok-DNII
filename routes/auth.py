@@ -7,6 +7,7 @@ auth_bp = Blueprint("auth", __name__)
 def login():
 
     if request.method == "POST":
+
         name = request.form["name"]
 
         user = User.query.filter_by(name=name).first()
