@@ -18,10 +18,8 @@ body{
 }
 
 .bg-soft{ background:var(--bg); }
-
 .container{ max-width: 980px; }
 
-/* Card */
 .card{
   border:none;
   border-radius:var(--radius);
@@ -34,7 +32,6 @@ body{
   box-shadow: var(--shadow);
 }
 
-/* Avatars */
 .avatar{
   width:52px;
   height:52px;
@@ -51,7 +48,6 @@ body{
   box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
 
-/* Tasks */
 .task{
   padding:14px 16px;
   border-radius:16px;
@@ -64,7 +60,6 @@ body{
 }
 .task:hover{ transform: translateX(4px); }
 
-/* Difficulty colors */
 .diff1{ background:#e6f9f1; }
 .diff2{ background:#f0fae6; }
 .diff3{ background:#fff7e6; }
@@ -80,7 +75,6 @@ body{
   100%{ box-shadow:0 0 6px #d8b4fe; }
 }
 
-/* Buttons */
 .btn{
   border-radius:14px;
   font-weight:600;
@@ -102,12 +96,10 @@ body{
   border:none;
   box-shadow: 0 6px 14px rgba(239,68,68,0.18);
 }
-
-.btn-outline-success, .btn-outline-danger, .btn-outline-secondary, .btn-outline-dark{
+.btn-outline-success, .btn-outline-danger, .btn-outline-secondary, .btn-outline-dark, .btn-outline-primary{
   border-width:2px;
 }
 
-/* Progress */
 .progress{
   height:18px;
   border-radius:12px;
@@ -120,7 +112,6 @@ body{
   font-weight:700;
 }
 
-/* Difficulty selector buttons */
 .difficulty-select{
   display:flex;
   flex-wrap:wrap;
@@ -141,14 +132,40 @@ body{
   transform: scale(1.08);
 }
 
-/* Navbar bottom */
 .navbar{
   border-top-left-radius:18px;
   border-top-right-radius:18px;
   box-shadow: 0 -6px 18px rgba(0,0,0,0.05);
 }
 
-/* Mobile tweaks */
+/* Даты: чипы + свайп */
+.date-bar{ user-select:none; }
+.date-hint{ line-height:1.2; }
+.date-chips{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding-bottom:4px;
+  -webkit-overflow-scrolling: touch;
+}
+.date-chip{
+  white-space:nowrap;
+  border:2px solid rgba(99,102,241,0.18);
+  padding:8px 12px;
+  border-radius:999px;
+  background:#fff;
+  font-weight:700;
+  color:#374151;
+  cursor:pointer;
+  transition:.2s;
+}
+.date-chip:hover{ transform:translateY(-1px); }
+.date-chip.active{
+  background:rgba(99,102,241,0.12);
+  border-color:rgba(99,102,241,0.35);
+  color:#111827;
+}
+
 @media(max-width:768px){
   .avatar-large{ width:105px; height:105px; }
   .task{ padding:12px 12px; }
