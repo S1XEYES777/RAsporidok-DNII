@@ -1,1 +1,32 @@
+.glass{
+background: rgba(255,255,255,0.1);
+backdrop-filter: blur(10px);
+border-radius:20px;
+}
+
+.avatar{
+width:45px;
+height:45px;
+border-radius:50%;
+object-fit:cover;
+}
+
+.avatar-large{
+width:120px;
+height:120px;
+border-radius:50%;
+}
+
+.task{
+padding:8px;
+border-radius:12px;
+margin-bottom:8px;
+}
+
+.diff1{background:#b7f5c1;}
+.diff2{background:#d6ffb7;}
+.diff3{background:#fff0a8;}
+.diff4{background:#ffcfa3;}
+.diff5{background:#ffb3b3;}
+.diff6{background:#d8b3ff;}
 
