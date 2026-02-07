@@ -17,7 +17,6 @@ def profile():
 
     user = User.query.get(session["user_id"])
 
-    # Добавление задачи
     if request.method == "POST":
 
         text = request.form["text"]
@@ -31,15 +30,18 @@ def profile():
 
         return redirect("/profile")
 
-    # ВСЕ задачи пользователя
-    tasks = Task.query.filter_by(user_id=user.id).order_by(Task.date.desc()).all()
+    tasks = Task.query.filter_by(user_id=user.id).all()
 
-    return render_template("profile.html", tasks=tasks, me=user)
+    total = len(tasks)
+    completed = len([t for t in tasks if t.completed])
+
+    progress = 0
+    if total > 0:
+        progress = int((completed/total)*100)
+
+    return render_template("profile.html",tasks=tasks,me=user,progress=progress)
 
 
-# -------------------------
-# Удаление задачи
-# -------------------------
 @profile_bp.route("/delete_task/<int:id>")
 def delete_task(id):
 
@@ -52,9 +54,6 @@ def delete_task(id):
     return redirect("/profile")
 
 
-# -------------------------
-# Выполнение задачи
-# -------------------------
 @profile_bp.route("/complete_task/<int:id>")
 def complete_task(id):
 
@@ -67,13 +66,11 @@ def complete_task(id):
     return redirect("/profile")
 
 
-# -------------------------
-# Загрузка аватара
-# -------------------------
 @profile_bp.route("/upload_avatar", methods=["POST"])
 def upload_avatar():
 
     user = User.query.get(session["user_id"])
+
     file = request.files["avatar"]
 
     if file and allowed_file(file.filename):
@@ -82,6 +79,7 @@ def upload_avatar():
         filename = f"user_{user.id}_{filename}"
 
         filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+
         file.save(filepath)
 
         user.avatar = filename
