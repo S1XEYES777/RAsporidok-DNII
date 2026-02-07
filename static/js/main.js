@@ -27,7 +27,16 @@ html+=`
 
 <span>${t.text}</span>
 
-<span>${t.completed ? "✅" : ""}</span>
+<span>
+
+${t.completed ? "✅" : ""}
+
+${t.completed && !t.user_congrat ? 
+`<button onclick="congrat(${t.id})" class="btn btn-primary btn-sm">🎉</button>` : ""}
+
+${t.congrats > 0 ? `<small>${t.congrats}</small>` : ""}
+
+</span>
 
 </div>
 `
@@ -42,6 +51,11 @@ html+=`</div></div>`
 })
 
 document.getElementById("cards").innerHTML=html
+}
+
+async function congrat(id){
+await fetch("/congrat/"+id)
+load()
 }
 
 setInterval(load,3000)
