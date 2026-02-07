@@ -1,91 +1,86 @@
-import os
-from flask import Blueprint, render_template, request, redirect, session, current_app
-from werkzeug.utils import secure_filename
+from flask import Blueprint, render_template, request, redirect, session
 from models import db, User, Task
+import base64
 
 profile_bp = Blueprint("profile", __name__)
 
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
-
-def require_login():
-    return "user_id" in session
-
-def allowed_file(filename: str) -> bool:
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
 @profile_bp.route("/profile", methods=["GET", "POST"])
 def profile():
-    if not require_login():
+
+    if "user_id" not in session:
         return redirect("/")
 
-    me = User.query.get(session["user_id"])
+    user = User.query.get(session["user_id"])
 
     if request.method == "POST":
-        text = (request.form.get("text") or "").strip()
-        d = (request.form.get("date") or "").strip()
-        diff = int(request.form.get("difficulty") or 3)
 
-        if not text or not d:
-            return redirect("/profile")
+        text = request.form["text"]
+        date = request.form["date"]
+        difficulty = int(request.form["difficulty"])
 
-        diff = max(1, min(6, diff))
+        t = Task(
+            text=text,
+            date=date,
+            difficulty=difficulty,
+            user_id=user.id
+        )
 
-        db.session.add(Task(text=text, date=d, difficulty=diff, user_id=me.id))
+        db.session.add(t)
         db.session.commit()
-        return redirect("/profile")
 
-    tasks = Task.query.filter_by(user_id=me.id).order_by(Task.date.desc(), Task.created_at.desc()).all()
+    tasks = Task.query.filter_by(user_id=user.id).all()
 
-    total = len(tasks)
     done = len([t for t in tasks if t.completed])
-    progress = int((done / total) * 100) if total else 0
+    progress = int((done / len(tasks)) * 100) if tasks else 0
 
-    return render_template("profile.html", me=me, tasks=tasks, progress=progress)
+    return render_template("profile.html",
+                           me=user,
+                           tasks=tasks,
+                           progress=progress)
 
-@profile_bp.route("/profile/toggle/<int:task_id>")
-def toggle_task(task_id):
-    if not require_login():
-        return redirect("/")
-
-    me_id = session["user_id"]
-    t = Task.query.get(task_id)
-    if t and t.user_id == me_id:
-        t.completed = not t.completed
-        db.session.commit()
-    return redirect("/profile")
-
-@profile_bp.route("/profile/delete/<int:task_id>")
-def delete_task(task_id):
-    if not require_login():
-        return redirect("/")
-
-    me_id = session["user_id"]
-    t = Task.query.get(task_id)
-    if t and t.user_id == me_id:
-        db.session.delete(t)
-        db.session.commit()
-    return redirect("/profile")
 
 @profile_bp.route("/profile/upload_avatar", methods=["POST"])
 def upload_avatar():
-    if not require_login():
+
+    if "user_id" not in session:
         return redirect("/")
 
-    me = User.query.get(session["user_id"])
+    user = User.query.get(session["user_id"])
 
     file = request.files.get("avatar")
-    if not file or file.filename == "":
+
+    if not file:
         return redirect("/profile")
 
-    if not allowed_file(file.filename):
-        return redirect("/profile")
+    img_bytes = file.read()
 
-    filename = secure_filename(file.filename)
-    filename = f"user_{me.id}_{filename}"
+    encoded = base64.b64encode(img_bytes).decode("utf-8")
 
-    path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-    file.save(path)
-
-    me.avatar = filename
+    user.avatar = encoded
     db.session.commit()
+
+    return redirect("/profile")
+
+
+@profile_bp.route("/profile/delete/<int:id>")
+def delete_task(id):
+
+    t = Task.query.get(id)
+
+    if t and t.user_id == session["user_id"]:
+        db.session.delete(t)
+        db.session.commit()
+
+    return redirect("/profile")
+
+
+@profile_bp.route("/profile/toggle/<int:id>")
+def toggle_task(id):
+
+    t = Task.query.get(id)
+
+    if t and t.user_id == session["user_id"]:
+        t.completed = not t.completed
+        db.session.commit()
+
     return redirect("/profile")
