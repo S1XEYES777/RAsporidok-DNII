@@ -16,7 +16,7 @@ def admin():
         return redirect("/main")
     users = User.query.order_by(User.created_at.asc()).all()
     return render_template("admin.html", users=users)
-
+#21
 @admin_bp.route("/admin/delete_user/<int:user_id>")
 def delete_user(user_id):
     if not is_admin():
